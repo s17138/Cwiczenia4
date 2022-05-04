@@ -176,16 +176,28 @@ namespace LinqTutorials
         ///     SELECT * FROM Emps WHERE Job = "Backend programmer";
         /// </summary>
         public static IEnumerable<Emp> Task1()
-        {   
-            return null;
+        {
+            //query syntax
+            var query = from e in Emps
+                        where e.Job.Contains("Backend programmer")
+                        select e;
+            //method syntax
+            var methodSyntax = Emps.Where(e => e.Job.Contains("Backend programmer"));
+            return methodSyntax;
         }
 
         /// <summary>
         ///     SELECT * FROM Emps Job = "Frontend programmer" AND Salary>1000 ORDER BY Ename DESC;
         /// </summary>
         public static IEnumerable<Emp> Task2()
-        {         
-            return null;
+        {
+            //query syntax
+            var query = from e in Emps
+                        where e.Job.Contains("Frontend programmer") && e.Salary > 1000
+                        select e;
+            //method syntax
+            var methodSyntax = Emps.Where(e => e.Job.Contains("Frontend programmer") && e.Salary > 1000);
+            return methodSyntax;
         }
 
 
@@ -194,7 +206,9 @@ namespace LinqTutorials
         /// </summary>
         public static int Task3()
         {
-            return 0;
+            //method syntax
+            var methodSyntax = Emps.Max(e => e.Salary);
+            return methodSyntax;
         }
 
         /// <summary>
@@ -202,15 +216,23 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<Emp> Task4()
         {
-            return null;
+            var max = Emps.Max(e => e.Salary);
+            var query = from e in Emps
+                        where e.Salary == max
+                        select e;
+            return query;
         }
 
         /// <summary>
         ///    SELECT ename AS Nazwisko, job AS Praca FROM Emps;
         /// </summary>
         public static IEnumerable<object> Task5()
-        {           
-            return null;
+        {
+            var query = from e in Emps
+                        select new { Nazwisko = e.Ename, Praca = e.Job };
+            var methodSyntax = Emps
+                        .Select(e => new { Nazwisko = e.Ename, Praca = e.Job });
+            return query;
         }
 
         /// <summary>
@@ -219,16 +241,33 @@ namespace LinqTutorials
         ///     Rezultat: Złączenie kolekcji Emps i Depts.
         /// </summary>
         public static IEnumerable<object> Task6()
-        {         
-            return null;
+        {
+            var query = from e in Emps
+                        join d in Depts
+                        on e.Deptno equals d.Deptno
+                        select new { e.Ename, e.Job, d.Dname };
+
+            var methodSyntax = Emps.Join(
+                    Depts,
+                    e => e.Deptno,
+                    d => d.Deptno,
+                    (e, d) => new { e.Ename, e.Job, d.Dname }
+                );
+            return query;
         }
 
         /// <summary>
         ///     SELECT Job AS Praca, COUNT(1) LiczbaPracownikow FROM Emps GROUP BY Job;
         /// </summary>
         public static IEnumerable<object> Task7()
-        {            
-            return null;
+        {
+            var query = from e in Emps
+                        group e.Job by e.Job
+                        into g
+                        select new { Praca = g.Key, LiczbaPracownikow = g.Count() };
+            var methodSyntax = Emps.GroupBy(e => e.Job)
+                                   .Select(g => new { Praca = g.Key, LiczbaPracownikow = g.Count() });
+            return query;
         }
 
         /// <summary>
@@ -255,7 +294,7 @@ namespace LinqTutorials
         ///     SELECT "Brak wartości", null, null;
         /// </summary>
         public static IEnumerable<object> Task10()
-        {          
+        {
             return null;
         }
 
@@ -271,7 +310,7 @@ namespace LinqTutorials
         /// 3. Wykorzystaj typy anonimowe
         /// </summary>
         public static IEnumerable<object> Task11()
-        {           
+        {
             return null;
         }
 
@@ -283,7 +322,7 @@ namespace LinqTutorials
         /// Pracownicy powinny w ramach kolekcji być posortowani po nazwisku (rosnąco) i pensji (malejąco).
         /// </summary>
         public static IEnumerable<Emp> Task12()
-        {    
+        {
             return null;
         }
 
