@@ -276,7 +276,8 @@ namespace LinqTutorials
         /// </summary>
         public static bool Task8()
         {
-            return false;
+            var methodSyntax = Emps.Any(e => e.Job.Equals("Backend programmer"));
+            return methodSyntax;
         }
 
         /// <summary>
@@ -285,7 +286,8 @@ namespace LinqTutorials
         /// </summary>
         public static Emp Task9()
         {
-            return null;
+            var methodSyntax = Emps.Where(e => e.Job.Equals("Frontend programmer")).First();
+            return methodSyntax;
         }
 
         /// <summary>
@@ -295,7 +297,11 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<object> Task10()
         {
-            return null;
+            var methodSyntax = Emps
+              .Select(e => new { e.Ename, Job = (string?) e.Job, HireDate = e.HireDate })
+              .Union(Emps
+                    .Select(e => new { Ename = "Brak wartości", Job = (string?)null, HireDate =(DateTime?) null }));
+            return methodSyntax;
         }
 
         /// <summary>
