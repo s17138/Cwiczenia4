@@ -317,7 +317,16 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<object> Task11()
         {
-            return null;
+            var methodSyntax = Emps
+                         .Join(
+                                Depts,
+                                    e => e.Deptno,
+                                    d => d.Deptno,
+                                  (e, d) => new { Dname = d.Dname, e.Deptno })
+                         .GroupBy(e => e.Dname)
+                         .Where(g => g.Count() > 1)
+                         .Select(g => new { name = g.Key, numOfEmployees = g.Count() });
+            return methodSyntax;
         }
 
         /// <summary>
@@ -329,7 +338,7 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<Emp> Task12()
         {
-            return null;
+            return Emps.GetEmpsWithSubordinates();
         }
 
         /// <summary>
@@ -341,7 +350,7 @@ namespace LinqTutorials
         /// </summary>
         public static int Task13(int[] arr)
         {
-            return 0;
+            return arr.GroupBy(item => item).Where(item => item.Count() %2 == 1).Select(i => i.Key).First();
         }
 
         /// <summary>
@@ -359,7 +368,13 @@ namespace LinqTutorials
         //Put your extension methods here
         public static IEnumerable<Emp> GetEmpsWithSubordinates(this IEnumerable<Emp> emps)
         {
-            return null;
+            return emps.Where(emp => emps
+                .Where(e => e.Mgr != null)
+                .Select(e => e.Mgr)
+                .Contains(emp))
+                .OrderBy(e => e.Ename)
+                .ThenByDescending(e => e.Salary)
+                .Select(e => e);
         }
 
     }
