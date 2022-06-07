@@ -8,17 +8,22 @@ using System.Threading.Tasks;
 
 namespace Zad5.Model
 {
-    public class WarehouseDbRepository : IWarehouseDbRepository
+    public class DbService : IDbService
     {
-        private readonly string _DbConnectionString = "Data Source=DESKTOP-6R143CT;Initial Catalog=mydatabase;Integrated Security=True";
+        private readonly string _DbConnectionString;
 
-        public async Task<int> addWarehouse(WarehouseRequest warehouseRequest)
+        public DbService(string dbConnectionString)
+        {
+            _DbConnectionString = dbConnectionString;
+        }
+
+        public async Task<int?> addWarehouse(WarehouseRequest warehouseRequest)
         {
             try
             {
                 if ((await CheckIfProductExists(warehouseRequest.IdProduct)) && (await CheckIfWarehousetExists(warehouseRequest.IdWarehouse)) && warehouseRequest.Amount > 0)
                 {
-                    int? orderId = await GetOrderId(warehouseRequest.IdProduct, warehouseRequest.IdWarehouse, warehouseRequest.CreatedAt);
+                    int? orderId = await GetOrderId(warehouseRequest.IdProduct, warehouseRequest.Amount, warehouseRequest.CreatedAt);
                     if (orderId == null)
                     {
                         return -1;
@@ -28,8 +33,8 @@ namespace Zad5.Model
                     } else
                     {
                         await UpdateOrder(orderId);
-                        int? productPrice = await GetProductPrice(warehouseRequest.IdProduct);
-                        int resultId = await CreateProductWarehouse(warehouseRequest.IdProduct, orderId, warehouseRequest.Amount, productPrice);
+                        double? productPrice = await GetProductPrice(warehouseRequest.IdProduct);
+                        int? resultId = await CreateProductWarehouse(warehouseRequest.IdProduct, warehouseRequest.IdWarehouse, orderId, warehouseRequest.Amount, productPrice);
                         return resultId;
                     }
                 }
@@ -78,7 +83,7 @@ namespace Zad5.Model
             }
         }
 
-        private async Task<int?> GetOrderId(int? idProduct, int? idAmount, DateTime createdAt)
+        private async Task<int?> GetOrderId(int? idProduct, int? amount, DateTime createdAt)
         {
             using (SqlConnection con = new SqlConnection(_DbConnectionString))
             {
@@ -91,7 +96,7 @@ namespace Zad5.Model
                         "WHERE IdProduct = @IdProduct AND Amount = @Amount AND FulfilledAt IS NULL " +
                         "AND CreatedAt < @CreatedAt;";
                     com.Parameters.Add("@IdProduct", SqlDbType.Int).Value = idProduct;
-                    com.Parameters.Add("@Amount", SqlDbType.Int).Value = idAmount;
+                    com.Parameters.Add("@Amount", SqlDbType.Int).Value = amount;
                     com.Parameters.Add("@CreatedAt", SqlDbType.DateTime).Value = createdAt;
                     SqlDataReader dr = await com.ExecuteReaderAsync();
                     var hasRows = dr.HasRows;
@@ -134,7 +139,7 @@ namespace Zad5.Model
                     com.Connection = con;
                     con.Open();
                     com.CommandType = CommandType.Text;
-                    com.CommandText = "Update Order set FulfilledAt = @FulfilledAt where IdOrder=@IdOrder";
+                    com.CommandText = "Update \"Order\" set FulfilledAt = @FulfilledAt where IdOrder=@IdOrder";
                     com.Parameters.Add("@IdOrder", SqlDbType.Int).Value = orderId;
                     com.Parameters.Add("@FulfilledAt", SqlDbType.DateTime).Value = DateTime.Now;
                     int rowsAffected = await com.ExecuteNonQueryAsync();
@@ -142,7 +147,7 @@ namespace Zad5.Model
                 }
             }
         }
-        private async Task<int?> GetProductPrice(int? productId)
+        private async Task<double?> GetProductPrice(int? productId)
         {
             using (SqlConnection con = new SqlConnection(_DbConnectionString))
             {
@@ -162,14 +167,14 @@ namespace Zad5.Model
                     else
                     {
                         await dr.ReadAsync();
-                        int result = int.Parse(dr["Price"].ToString());
+                        double result = double.Parse(dr["Price"].ToString());
                         return result;
                     }
                 }
             }
         }
 
-        private async Task<int> CreateProductWarehouse(int? idProduct, int? idOrder, int? amount, int? productPrice)
+        private async Task<int?> CreateProductWarehouse(int? idProduct, int? idWarehouse, int? idOrder, int? amount, double? productPrice)
         {
             using (SqlConnection con = new SqlConnection(_DbConnectionString))
             {
@@ -179,14 +184,15 @@ namespace Zad5.Model
                     con.Open();
                     com.CommandType = CommandType.Text;
                     com.CommandText =
-                       // "SET IDENTITY_INSERT Product_Warehouse ON; " +
-                        "Insert into Product_Warehouse(IdProduct, IdOrder, Amount, Price, CreatedAt) values(@IdProduct, @IdOrder, @Amount, @Price, @CreatedAt)";
+                        // "SET IDENTITY_INSERT Product_Warehouse ON; " +
+                        "Insert into Product_Warehouse(IdProduct, IdWarehouse, IdOrder, Amount, Price, CreatedAt) output inserted.IdProductWarehouse values(@IdProduct, @IdWarehouse, @IdOrder, @Amount, @Price, @CreatedAt)";
                     com.Parameters.Add("@IdProduct", SqlDbType.Int).Value = idProduct;
+                    com.Parameters.Add("@IdWarehouse", SqlDbType.Int).Value = idWarehouse;
                     com.Parameters.Add("@IdOrder", SqlDbType.Int).Value = idOrder;
-                    com.Parameters.Add("@Price", SqlDbType.Int).Value = amount * productPrice;
+                    com.Parameters.Add("@Price", SqlDbType.Float).Value = amount * productPrice;
                     com.Parameters.Add("@Amount", SqlDbType.Int).Value = amount;
-                    com.Parameters.Add("@CreatedAt", SqlDbType.Int).Value = DateTime.Now;
-                    int resultId = (int)await com.ExecuteScalarAsync();
+                    com.Parameters.Add("@CreatedAt", SqlDbType.DateTime).Value = DateTime.Now;
+                    int? resultId = (int?)await com.ExecuteScalarAsync();
                     return resultId;
                 }
             }

@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace Zad5.Model
 {
-    public interface IWarehouseDbRepository
+    public interface IDbService
     {
-        public Task<int> addWarehouse(WarehouseRequest warehouseRequest);
+        public Task<int?> addWarehouse(WarehouseRequest warehouseRequest);
     }
 }

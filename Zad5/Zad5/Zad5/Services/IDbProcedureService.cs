@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Zad5.Model
 {
-    public interface IWarehouseProcedureRepository
+    public interface IDbProcedureService
     {
         public bool addWarehouse(WarehouseRequest warehouseRequest);
     }

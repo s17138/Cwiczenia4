@@ -12,9 +12,9 @@ namespace Zad5.Controllers
     [ApiController]
     public class Warehouses2Controller : ControllerBase
     {
-        private readonly IWarehouseProcedureRepository _warehouseProcedureRepository;
+        private readonly IDbProcedureService _warehouseProcedureRepository;
 
-        public Warehouses2Controller(IWarehouseProcedureRepository warehouseProcedureRepository)
+        public Warehouses2Controller(IDbProcedureService warehouseProcedureRepository)
         {
             _warehouseProcedureRepository = warehouseProcedureRepository;
         }

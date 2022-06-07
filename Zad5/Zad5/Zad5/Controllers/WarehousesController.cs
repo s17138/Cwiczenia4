@@ -12,9 +12,9 @@ namespace Zad5.Controllers
     [ApiController]
     public class WarehousesController : ControllerBase
     {
-        private readonly IWarehouseDbRepository _warehouseDbRepository;
+        private readonly IDbService _warehouseDbRepository;
 
-        public WarehousesController(IWarehouseDbRepository warehouseDbRepository)
+        public WarehousesController(IDbService warehouseDbRepository)
         {
             _warehouseDbRepository = warehouseDbRepository;
         }
@@ -30,7 +30,7 @@ namespace Zad5.Controllers
             {
                 return BadRequest();
             }
-            int result = await _warehouseDbRepository.addWarehouse(warehouseRequest);
+            int? result = await _warehouseDbRepository.addWarehouse(warehouseRequest);
             if (result > 0)
             {
                 return Ok(result);

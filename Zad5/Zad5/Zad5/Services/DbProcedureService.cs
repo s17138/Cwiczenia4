@@ -8,9 +8,15 @@ using System.Threading.Tasks;
 
 namespace Zad5.Model
 {
-    public class WarehouseProcedureRepository : IWarehouseProcedureRepository
+    public class DbProcedureService : IDbProcedureService
     {
-        private readonly string _DbConnectionString = "Data Source=DESKTOP-6R143CT;Initial Catalog=mydatabase;Integrated Security=True";
+        private readonly string _DbConnectionString;
+
+        public DbProcedureService(string dbConnectionString)
+        {
+            _DbConnectionString = dbConnectionString;
+        }
+
         public bool addWarehouse(WarehouseRequest warehouseRequest)
         {
             try
