@@ -298,9 +298,9 @@ namespace LinqTutorials
         public static IEnumerable<object> Task10()
         {
             var methodSyntax = Emps
-              .Select(e => new { e.Ename, Job = (string?) e.Job, HireDate = e.HireDate })
+              .Select(e => new { e.Ename, Job = (string?)e.Job, HireDate = e.HireDate })
               .Union(Emps
-                    .Select(e => new { Ename = "Brak wartości", Job = (string?)null, HireDate =(DateTime?) null }));
+                    .Select(e => new { Ename = "Brak wartości", Job = (string?)null, HireDate = (DateTime?)null }));
             return methodSyntax;
         }
 
@@ -350,7 +350,7 @@ namespace LinqTutorials
         /// </summary>
         public static int Task13(int[] arr)
         {
-            return arr.GroupBy(item => item).Where(item => item.Count() %2 == 1).Select(i => i.Key).First();
+            return arr.GroupBy(item => item).Where(item => item.Count() % 2 == 1).Select(i => i.Key).First();
         }
 
         /// <summary>
@@ -359,7 +359,23 @@ namespace LinqTutorials
         /// </summary>
         public static IEnumerable<Dept> Task14()
         {
-            return null;
+            var methodSyntax = Depts
+                               .GroupJoin(Emps, dept => dept.Deptno, emp => emp.Deptno, (dept, emp) => new { Dept = dept, Emp = emp })
+                               .Where(x => x.Emp.Count() == 0 || x.Emp.Count() == 5)
+                               .OrderBy(x => x.Dept.Dname)
+                               .Select(x => x.Dept)
+                               .ToList();
+
+
+            var querySyntax = from d in Depts
+                              let empCount = (from e in Emps
+                                              where e.Deptno == d.Deptno
+                                              select e).Count()
+                              where empCount == 0 || empCount == 5
+                              orderby d.Dname
+                              select d;
+
+            return methodSyntax;
         }
     }
 
